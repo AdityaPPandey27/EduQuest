@@ -1,7 +1,7 @@
 // EduQuest/backend/controllers/quizController.js
 
 const asyncHandler = require('express-async-handler');
-const Quiz = require('../models/Quiz');
+const Quiz = require('../models/quiz');
 
 // @desc    Get all available quizzes
 // @route   GET /api/quiz
