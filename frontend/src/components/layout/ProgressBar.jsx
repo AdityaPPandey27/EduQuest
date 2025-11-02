@@ -1,20 +1,27 @@
-// EduQuest/frontend/src/components/utils/ProgressBar.jsx
 import React from 'react';
+import { motion } from 'framer-motion'; 
 
-export const ProgressBar = ({ label, current, max, color = 'bg-blue-500' }) => {
-    const percentage = Math.min(100, (current / max) * 100);
-    return (
-        <div className="w-full">
-            <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">{label}</span>
-                <span className="text-sm font-semibold text-gray-900">{current} / {max} ({percentage.toFixed(0)}%)</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                    className={`h-2.5 rounded-full transition-all duration-500 ${color}`} 
-                    style={{ width: `${percentage}%` }}
-                ></div>
-            </div>
-        </div>
-    );
+const ProgressBar = ({ currentXp, maxXp, userLevel }) => {
+  const percentage = maxXp > 0 ? (currentXp / maxXp) * 100 : 0;
+  const clampedPercentage = Math.min(100, Math.max(0, percentage)); 
+
+  return (
+    <div className="w-full bg-gray-300 dark:bg-dark-card/50 rounded-full h-5 relative shadow-inner">
+      {/* 2. Animate the progress bar width (Framer Motion) */}
+      <motion.div
+        className="h-full rounded-full absolute top-0 left-0 
+                   bg-gradient-to-r from-xp-start to-xp-end shadow-md" 
+        initial={{ width: '0%' }}
+        // Animate the width based on the XP percentage
+        animate={{ width: `${clampedPercentage}%` }}
+        // Smooth and satisfying bounce effect
+        transition={{ duration: 1.5, type: 'spring', bounce: 0.3 }} 
+      />
+      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+        Level {userLevel || 1}: {currentXp} / {maxXp} XP
+      </div>
+    </div>
+  );
 };
+
+export default ProgressBar;

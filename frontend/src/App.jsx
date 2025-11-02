@@ -1,114 +1,68 @@
-// EduQuest/frontend/src/App.jsx (UPDATED with Leaderboard and Profile Routes)
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { AnimatePresence } from 'framer-motion'; 
 
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+// Assuming these exist from previous steps
+import { fetchUserProfile } from './redux/slices/authSlice'; 
+import ProtectedRoute from './components/auth/ProtectedRoute'; 
+import PageTransition from './components/common/PageTransition'; 
 
-// Layout Components (Explicit .jsx extension added)
-import Navbar from './components/layout/Navbar.jsx';
-import Footer from './components/layout/Footer.jsx';
-import Sidebar from './components/layout/Sidebar.jsx';
+// Import Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard'; 
+import Profile from './pages/Profile';
+import Leaderboard from './pages/Leaderboard';
 
-// Page Components (Explicit .jsx extension added)
-import Home from './pages/Home.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
-import Dashboard from './pages/Dashboard.jsx'; 
-import TeacherDashboard from './pages/TeacherDashboard.jsx'; 
-import Leaderboard from './pages/Leaderboard.jsx'; // NEW IMPORT
-import Profile from './pages/Profile.jsx';       // NEW IMPORT
-
-
-// --- ROUTER & LAYOUT COMPONENTS ---
-
-// Protected Route Wrapper (Requires any user)
-const ProtectedRoute = ({ children }) => {
-    const { user } = useSelector((state) => state.auth); 
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    }
-    return children;
-};
-
-// Teacher/Admin Route Wrapper (Requires specific role)
-const TeacherRoute = ({ children }) => {
-    const { user } = useSelector((state) => state.auth);
-    // Check if user is logged in AND their role is teacher or admin
-    if (!user || (user.role !== 'teacher' && user.role !== 'admin')) {
-        // Redirect non-teachers to their regular dashboard or home
-        return <Navigate to="/dashboard" replace />;
-    }
-    return children;
-};
-
-// Main Layout Wrapper
-const MainLayout = ({ children, hideSidebar = false }) => (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar />
-        <div className="flex flex-1 max-w-7xl w-full mx-auto">
-            {/* Conditional Sidebar */}
-            {!hideSidebar && <Sidebar />} 
-            <main className="flex-1 p-6 md:p-8">
-                {children}
-            </main>
+// A simple Layout to hold the public-facing content
+const PublicLayout = ({ children }) => {
+    return (
+        <div className="min-h-screen">
+            {/* Theme toggle is included in the dashboard/header for authenticated users, 
+               but for public routes, we can include it here if a minimal layout is needed. */}
+            {children}
         </div>
-        <Footer />
-    </div>
-);
+    );
+};
 
-
-// --- MAIN APP COMPONENT ---
-
+// Main Component with AnimatePresence for Transitions
 function App() {
-  return (
-    <Router>
-        <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<MainLayout hideSidebar={true}><Home /></MainLayout>} />
-            <Route path="/login" element={<MainLayout hideSidebar={true}><Login /></MainLayout>} />
-            <Route path="/register" element={<MainLayout hideSidebar={true}><Register /></MainLayout>} />
-            
-            {/* Student Protected Routes */}
-            <Route 
-                path="/dashboard" 
-                element={
-                    <ProtectedRoute>
-                        <MainLayout><Dashboard /></MainLayout>
-                    </ProtectedRoute>
-                } 
-            />
-            <Route 
-                path="/profile" 
-                element={
-                    <ProtectedRoute>
-                        <MainLayout><Profile /></MainLayout>
-                    </ProtectedRoute>
-                } 
-            />
-            <Route 
-                path="/leaderboard" 
-                element={
-                    <ProtectedRoute>
-                        <MainLayout><Leaderboard /></MainLayout>
-                    </ProtectedRoute>
-                } 
-            />
-            
-            {/* Teacher Protected Route (with role check) */}
-            <Route 
-                path="/teacher/dashboard" 
-                element={
-                    <TeacherRoute>
-                        <MainLayout><TeacherDashboard /></MainLayout>
-                    </TeacherRoute>
-                } 
-            />
-            
-            {/* Default redirect for unhandled routes */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-    </Router>
-  );
+    const dispatch = useDispatch();
+    const location = useLocation(); 
+
+    useEffect(() => {
+        // Fetch user profile on initial load
+        dispatch(fetchUserProfile());
+    }, [dispatch]);
+
+    // 4. Wrap Routes with AnimatePresence to enable smooth transitions
+    return (
+        <AnimatePresence mode="wait" initial={false}>
+            <Routes location={location} key={location.pathname}>
+                {/* Public Routes - Wrapped in PageTransition */}
+                <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+                <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+                <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+                
+                {/* Protected Routes - The child element inside ProtectedRoute/Outlet will use the PageTransition */}
+                <Route element={<ProtectedRoute />}>
+                  {/* Dashboard is a major layout, handles its own transition wrapper to simplify */}
+                  <Route path="/dashboard" element={<Dashboard />} /> 
+                  
+                  {/* Wrap other pages individually if they don't have their own internal layout/wrapper */}
+                  <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+                  <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />
+                  <Route path="/missions" element={<PageTransition><div>Missions Page</div></PageTransition>} />
+                  <Route path="/quizzes" element={<PageTransition><div>Quizzes Page</div></PageTransition>} />
+                </Route>
+                
+                {/* Catch all other routes */}
+                <Route path="*" element={<PageTransition><div>404 Not Found</div></PageTransition>} />
+            </Routes>
+        </AnimatePresence>
+    );
 }
 
 export default App;
