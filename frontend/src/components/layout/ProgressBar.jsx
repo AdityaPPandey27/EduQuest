@@ -1,0 +1,20 @@
+// EduQuest/frontend/src/components/utils/ProgressBar.jsx
+import React from 'react';
+
+export const ProgressBar = ({ label, current, max, color = 'bg-blue-500' }) => {
+    const percentage = Math.min(100, (current / max) * 100);
+    return (
+        <div className="w-full">
+            <div className="flex justify-between mb-1">
+                <span className="text-sm font-medium text-gray-700">{label}</span>
+                <span className="text-sm font-semibold text-gray-900">{current} / {max} ({percentage.toFixed(0)}%)</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                    className={`h-2.5 rounded-full transition-all duration-500 ${color}`} 
+                    style={{ width: `${percentage}%` }}
+                ></div>
+            </div>
+        </div>
+    );
+};
