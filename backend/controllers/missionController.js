@@ -1,7 +1,7 @@
 // EduQuest/backend/controllers/missionController.js
 
 const asyncHandler = require('express-async-handler');
-const Mission = require('../models/Mission');
+const Mission = require('../models/mission');
 const User = require('../models/User');
 
 // @desc    Get all active missions
