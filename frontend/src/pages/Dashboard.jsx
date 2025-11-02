@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 // Assuming these components exist from previous steps
 import Sidebar from '../components/layout/Sidebar'; 
-import PageContainer from '../components/layout/PageContainer';
+import { PageContainer } from '../components/layout/PageContainer';
 import StartCard from '../components/layout/StartCard';
 import ProgressBar from '../components/layout/ProgressBar';
 import PageTransition from '../components/common/PageTransition'; 
